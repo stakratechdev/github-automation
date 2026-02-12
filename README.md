@@ -1,320 +1,454 @@
-# GitHub Automation Architecture
+# 🚀 StakraTech AI Development Platform
 
-Eine vollständig containerisierte, interne Fullstack-Automatisierungsarchitektur für GitHub-basierte Softwareentwicklung.
+Eine vollständig containerisierte, KI-gesteuerte Fullstack-Entwicklungsplattform für Flutter-Web-Anwendungen mit Cloudflare-Infrastruktur.
 
-## 🚀 Übersicht
+---
 
-Diese Architektur implementiert ein Multi-Agenten-System, das den gesamten Entwicklungsprozess automatisiert, von der Anforderungsanalyse bis zur QA-Validierung.
+## 📋 Inhaltsverzeichnis
 
-### Hauptkomponenten
+1. [Überblick](#-überblick)
+2. [Architektur](#-architektur)
+3. [Schnellstart](#-schnellstart)
+4. [Projektstruktur](#-projektstruktur)
+5. [AI Agenten System](#-ai-agenten-system)
+6. [StakraTech Design System](#-stakratech-design-system)
+7. [Deployment](#-deployment)
+8. [Entwicklung](#-entwicklung)
+9. [Dokumentation](#-dokumentation)
+
+---
+
+## 🌟 Überblick
+
+Diese Plattform kombiniert:
+
+- **🤖 Multi-Agenten KI-System** - Automatisiert den gesamten Entwicklungsprozess
+- **🎨 StakraTech Design System** - Dark-first, Electric Blue Gradient UI
+- **🐦 Flutter Web** - Cross-platform mobile & web Apps
+- **☁️ Cloudflare Infrastruktur** - Workers, Pages, D1 Database
+- **🐳 Docker Containerisierung** - Vollständig containerisierte Entwicklung
+- **🔄 GitHub Actions CI/CD** - Automatisierte Builds & Deployment
+
+### Workflow
+
+```
+GitHub Issue → Requirements Engineer → Solution Architect 
+    → Frontend/Backend Dev → QA Engineer → DevOps 
+    → Cloudflare Pages Deployment
+```
+
+---
+
+## 🏗️ Architektur
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    GitHub Issues (Source)                       │
+│                    GitHub Issues / Features                      │
 └─────────────────────────┬───────────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              Requirements Engineer Agent                        │
-│  • Analysiert neue Issues                                        │
-│  • Stellt Klärungsfragen                                         │
-│  • Markiert als "ready_for_dev"                                  │
-└─────────────────────────┬───────────────────────────────────────┘
+│              AI Agent Orchestrator (Claude Code)                 │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ .claude/agents/                                         │    │
+│  │ ├── requirements-engineer.md  → Feature Specs          │    │
+│  │ ├── solution-architect.md     → Tech Design           │    │
+│  │ ├── frontend-dev.md           → Flutter UI             │    │
+│  │ ├── backend-dev.md            → Cloudflare Workers    │    │
+│  │ ├── qa-engineer.md           → Testing               │    │
+│  │ └── devops.md                 → Deployment            │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└─────────────────────────┬─────────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              MQTT Event Bus (Ereignissystem)                    │
-└─────────────────────────┬───────────────────────────────────────┘
-                          │
-          ┌───────────────┼───────────────┐
-          ▼               ▼               ▼
-┌─────────────┐   ┌─────────────┐   ┌─────────────┐
-│   Frontend  │   │   Backend   │   │    QA       │
-│   Agent     │   │   Agent     │   │   Agent     │
-│             │   │             │   │             │
-│ • Generiert │   │ • Generiert │   │ • Validiert │
-│   UI-Code   │   │   API-Code  │   │   Code      │
-│ • Erstellt │   │ • Erstellt │   │ • Führt    │
-│   Branches  │   │   Branches │   │   Tests    │
-└─────────────┘   └─────────────┘   └─────────────┘
+│              Containerisierte Agenten (Docker)                   │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐             │
+│  │ Requirements │ │ Frontend    │ │ Backend     │             │
+│  │ Engineer     │ │ Agent       │ │ Agent       │             │
+│  └─────────────┘ └─────────────┘ └─────────────┘             │
+│  ┌─────────────┐ ┌─────────────┐                            │
+│  │ QA Agent    │ │ DevOps      │                            │
+│  └─────────────┘ └─────────────┘                            │
+└─────────────────────────┬─────────────────────────────────────┘
                           │
                           ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    GitHub PRs & Merge                           │
+│                    Cloudflare Infrastructure                     │
+│  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐         │
+│  │ Cloudflare   │ │ Cloudflare   │ │ Cloudflare   │         │
+│  │ Pages        │ │ Workers      │ │ D1 Database  │         │
+│  └──────────────┘ └──────────────┘ └──────────────┘         │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 📁 Projektstruktur
+---
 
-```
-github_setup/
-├── agents/                     # Agent-Implementierungen
-│   ├── requirements_engineer/  # Requirements Engineer Agent
-│   ├── frontend_agent/         # Frontend Code Generator
-│   ├── backend_agent/          # Backend Code Generator
-│   └── qa_agent/              # QA & Code Review Agent
-├── common/                     # Gemeinsame Module
-│   ├── config_loader.py        # Konfigurations-Management
-│   ├── event_types.py          # Event & Status Definitionen
-│   ├── mqtt_client.py          # MQTT Event Bus Client
-│   ├── github_client.py        # GitHub API Client
-│   └── llm_client.py           # LLM API Integration
-├── config/                     # Konfigurationsdateien
-│   ├── config.yaml             # Hauptkonfiguration
-│   └── .env.example            # Umgebungsvariablen-Vorlage
-├── docker/                     # Docker-Konfiguration
-│   ├── docker-compose.yml      # Container-Orchestrierung
-│   └── mosquitto/              # MQTT Broker Konfiguration
-├── .github/
-│   ├── workflows/              # GitHub Actions
-│   │   └── ci-cd.yml           # CI/CD Pipeline
-│   └── SECRETS.md              # Secrets Management Guide
-└── tests/                     # Unit Tests
-```
+## ⚡ Schnellstart
 
-## 🛠️ Schnellstart
+### 1. Repository klonen
 
-### Voraussetzungen
-
-- Docker & Docker Compose
-- GitHub Personal Access Token
-- LLM API Key (OpenAI oder Anthropic)
-
-### Installation
-
-1. **Repository klonen**
 ```bash
-git clone <repository-url>
-cd github_setup
+git clone https://github.com/stakratechdev/github-automation.git
+cd github-automation
 ```
 
-2. **Umgebungsvariablen konfigurieren**
+### 2. Umgebung konfigurieren
+
 ```bash
 cp config/.env.example .env
 # Bearbeiten Sie .env mit Ihren API-Keys
 ```
 
-3. **Docker Container starten**
+### 3. Docker starten
+
 ```bash
 cd docker
 docker compose up -d
 ```
 
-4. **Status prüfen**
+### 4. Ersten Feature starten
+
 ```bash
-docker compose ps
+# Mit Claude Code:
+"Read .claude/agents/requirements-engineer.md and create a feature spec for user authentication"
 ```
 
-## ⚙️ Konfiguration
+---
 
-### config/config.yaml
+## 📁 Projektstruktur
 
-Die Hauptkonfigurationsdatei steuert alle Aspekte des Systems:
+```
+github-automation/
+├── agents/                      # Docker-Agenten
+│   ├── requirements_engineer/  # Requirements Engineer
+│   ├── frontend_agent/         # Frontend Code Generator
+│   ├── backend_agent/         # Backend Code Generator
+│   └── qa_agent/              # QA & Testing Agent
+├── common/                     # Shared Python modules
+│   ├── config_loader.py        # Konfiguration
+│   ├── event_types.py          # Event definitions
+│   ├── mqtt_client.py          # MQTT Event Bus
+│   ├── github_client.py        # GitHub API
+│   └── llm_client.py           # LLM Integration
+├── design/                     # Flutter Design System
+│   ├── stakra_colors.dart     # Farbpalette
+│   ├── stakra_typography.dart  # Typografie
+│   ├── stakra_theme.dart       # Material3 Theme
+│   └── stakra_components.dart  # Premium Components
+├── .claude/                    # AI Agent Prompts
+│   └── agents/
+│       ├── requirements-engineer.md
+│       ├── solution-architect.md
+│       ├── frontend-dev.md
+│       ├── backend-dev.md
+│       ├── qa-engineer.md
+│       └── devops.md
+├── docker/                     # Containerisierung
+│   ├── docker-compose.yml
+│   └── mosquitto/
+├── config/                     # Konfiguration
+│   ├── config.yaml
+│   └── .env.example
+├── .github/
+│   ├── workflows/
+│   │   └── ci-cd.yml
+│   └── SECRETS.md
+├── features/                   # Feature Specifications
+│   └── README.md
+└── README.md
+```
+
+---
+
+## 🤖 AI Agenten System
+
+### Verfügbare Agenten
+
+| Agent | Beschreibung | Prompt |
+|-------|-------------|--------|
+| **Requirements Engineer** | Feature Specs mit interaktiven Fragen | `requirements-engineer.md` |
+| **Solution Architect** | PM-freundliches Tech Design | `solution-architect.md` |
+| **Frontend Developer** | Flutter UI mit StakraTech Design | `frontend-dev.md` |
+| **Backend Developer** | Cloudflare Workers + D1 | `backend-dev.md` |
+| **QA Engineer** | Testing & Validation | `qa-engineer.md` |
+| **DevOps** | Cloudflare Pages Deployment | `devops.md` |
+
+### Verwendung mit Claude Code
+
+```bash
+# 1. Feature Spec erstellen
+"Read .claude/agents/requirements-engineer.md and create a feature spec for user authentication"
+
+# 2. Tech Design erstellen
+"Read .claude/agents/solution-architect.md and design architecture for /features/user-auth.md"
+
+# 3. Frontend implementieren
+"Read .claude/agents/frontend-dev.md and implement /features/user-auth.md"
+
+# 4. Backend implementieren
+"Read .claude/agents/backend-dev.md and implement /features/user-auth.md"
+
+# 5. QA Tests schreiben
+"Read .claude/agents/qa-engineer.md and test /features/user-auth.md"
+
+# 6. Deployen
+"Read .claude/agents/devops.md and deploy to Cloudflare Pages"
+```
+
+### Feature Specification Format
+
+Alle Features werden in `/features/` gespeichert:
+
+```
+features/
+├── PROJ-1-user-auth.md          # Feature Spec
+├── PROJ-1-user-auth-tech.md     # Tech Design
+├── PROJ-1-user-auth-test.md     # Test Results
+└── README.md                     # Feature Overview
+```
+
+---
+
+## 🎨 StakraTech Design System
+
+### Farbpalette
+
+```dart
+import 'package:github_automation/design/stakra_colors.dart';
+
+// Primary
+STColors.primary        // #1E6CFF - Electric Blue
+STColors.primaryDark    // #0D47A1
+STColors.accent        // #00B3FF
+
+// Backgrounds
+STColors.background     // #0A0F1C
+STColors.surface        // #111827
+
+// Text
+STColors.textPrimary    // #E5E7EB
+STColors.textMuted     // #9CA3AF
+
+// Gradient
+STColors.primaryGradient
+```
+
+### Premium Components
+
+```dart
+import 'package:github_automation/design/stakra_components.dart';
+
+// Gradient Button
+STGradientButton(
+    text: 'Get Started',
+    onPressed: () => print('Clicked!'),
+)
+
+// Glass Card
+STGlassCard(
+    child: Column(
+        children: [/* content */],
+    ),
+)
+
+// KPI Card
+STKpiCard(
+    title: 'Active Users',
+    value: '1,234',
+    change: '+12%',
+    icon: Icons.people,
+)
+
+// Issue Card
+STIssueCard(
+    number: '123',
+    title: 'Implement OAuth2',
+    status: 'ready_for_dev',
+    labels: ['frontend', 'feature'],
+    onTap: () => navigateToIssue(),
+)
+
+// Status Badge
+STStatusBadge(status: 'in_progress')
+```
+
+### Theme Usage
+
+```dart
+import 'package:github_automation/design/stakra_theme.dart';
+
+MaterialApp(
+    theme: STTheme.dark(),
+    home: HomeScreen(),
+);
+```
+
+---
+
+## ☁️ Deployment
+
+### Cloudflare Pages
+
+Die Plattform ist für **Cloudflare Pages** optimiert:
+
+```bash
+# Build
+flutter build web --web-renderer html
+
+# Deploy mit Wrangler
+npx wrangler pages deploy ./build/web
+```
+
+### GitHub Actions CI/CD
+
+Automatische Deployments bei Push auf `main`:
 
 ```yaml
-github:
-  owner: "your-org"
-  repo: "your-repo"
-  token: "${GITHUB_TOKEN}"
-
-mqtt:
-  broker: "mqtt://mqtt-broker:1883"
-
-llm:
-  provider: "openai"
-  model: "gpt-4"
-
-agents:
-  requirements_engineer:
-    poll_interval: 30
-    labels:
-      new: "needs-analysis"
-      ready: "ready_for_dev"
+# .github/workflows/ci-cd.yml
+- name: Deploy to Cloudflare Pages
+  uses: cloudflare/pages-action@v1
+  with:
+      apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      projectName: github-automation
+      directory: build/web
 ```
 
-## 🔄 Workflow
+### Environment Variables
 
-### 1. Issue erstellen
+```bash
+# Erforderlich
+CLOUDFLARE_API_TOKEN=
+CLOUDFLARE_ACCOUNT_ID=
 
-Erstellen Sie ein GitHub Issue mit der `needs-analysis` Label:
-
-```markdown
-## Titel
-Neue Benutzer-Authentifizierung implementieren
-
-## Beschreibung
-Wir möchten eine OAuth2-Authentifizierung für Benutzer implementieren.
-Benutzer sollen sich mit Google und GitHub anmelden können.
+# Optional
+SENTRY_DSN=
 ```
 
-### 2. Requirements Engineer Agent
+---
 
-Der Agent analysiert das Issue und stellt automatisch Klärungsfragen:
+## 💻 Entwicklung
 
+### Lokale Entwicklung
+
+```bash
+# Python Agenten
+cd agents/requirements_engineer
+pip install -r requirements.txt
+python -m agents.requirements_engineer.agent
+
+# Flutter Web
+flutter pub get
+flutter build web --web-renderer html
+flutter run -d chrome
 ```
-🤖 Requirements Engineer Agent
 
-Ich habe Ihre Anforderung analysiert und benötige einige Präzisierungen:
+### Docker Entwicklung
 
-### ❓ Klärungsfragen:
-1. Welche OAuth2-Provider sollen unterstützt werden?
-2. Sollen bestehende Benutzerkonten migriert werden?
-3. Welche Berechtigungen sind für die OAuth-Token erforderlich?
+```bash
+# Alle Dienste starten
+cd docker
+docker compose up -d
+
+# Logs anzeigen
+docker compose logs -f
+
+# Einzelne Dienste
+docker compose exec requirements-engineer bash
 ```
 
-### 3. Antworten und Markieren
+### Testing
 
-Nachdem Sie die Fragen beantwortet haben, markiert der Agent das Issue als `ready_for_dev`.
+```bash
+# Unit Tests
+pytest tests/ -v --cov
 
-### 4. Code-Generierung
+# Integration Tests
+docker compose exec requirements-engineer pytest tests/ -v
 
-Je nach Label generieren spezialisierte Agenten den Code:
-
-- **Frontend-Label**: Frontend-Agent erstellt Flutter-UI-Komponenten
-- **Backend-Label**: Backend-Agent erstellt REST-API-Endpunkte
-
-### 5. QA-Validierung
-
-Der QA-Agent:
-- Führt automatisierte Tests durch
-- Validiert die Code-Qualität
-- Erstellt Pull Requests
-
-## 📡 Event-System (MQTT)
-
-### Topics
-
-| Topic | Beschreibung |
-|-------|-------------|
-| `github/automation/events` | Alle Agent-Events |
-| `github/automation/status` | Statusänderungen |
-| `github/automation/issues` | Issue-bezogene Events |
-
-### Event-Typen
-
-```python
-EventType.ISSUE_CREATED    # Neues Issue erstellt
-EventType.STATUS_CHANGED   # Status geändert
-EventType.CODE_GENERATED   # Code generiert
-EventType.CODE_COMMITTED    # Code committet
-EventType.QA_PASSED         # QA bestanden
-EventType.QA_FAILED         # QA nicht bestanden
+# Coverage Report
+pytest --cov=common --cov-report=html
 ```
+
+---
+
+## 📖 Dokumentation
+
+| Dokumentation | Beschreibung |
+|--------------|-------------|
+| [README.md](README.md) | Hauptübersicht |
+| [.github/SECRETS.md](.github/SECRETS.md) | Secrets Management |
+| [.claude/agents/*.md](.claude/agents/) | AI Agent Prompts |
+| [design/](design/) | Flutter Design System |
+
+### API Referenz
+
+| Service | Endpoint | Beschreibung |
+|---------|----------|-------------|
+| GitHub API | `api.github.com` | Issue Management |
+| MQTT | `mqtt-broker:1883` | Event Bus |
+| Cloudflare | `api.cloudflare.com` | Workers & Pages |
+
+---
 
 ## 🔐 Sicherheit
 
-### Secrets-Management
+### Secrets Management
 
-Alle API-Keys und Tokens werden über Umgebungsvariablen verwaltet:
-
-```bash
-# Nie in Code oder Config committen!
-GITHUB_TOKEN=ghp_...
-LLM_API_KEY=sk-...
-```
-
-### GitHub Actions Secrets
-
-Konfigurieren Sie Secrets in:
-**Repository Settings → Secrets and variables → Actions**
-
-Erforderliche Secrets:
-- `GITHUB_TOKEN`
-- `LLM_API_KEY`
-
-## 🧪 Testing
-
-### Unit Tests ausführen
+Alle Secrets werden über Umgebungsvariablen verwaltet:
 
 ```bash
-cd agents/requirements_engineer
-pip install -r requirements.txt
-pytest tests/ -v
+# GitHub Secrets (Repository Settings)
+GITHUB_TOKEN=
+LLM_API_KEY=
+CLOUDFLARE_API_TOKEN=
+
+# Environment Variables (.env)
+GITHUB_OWNER=stakratechdev
+GITHUB_REPO=your-repo
 ```
 
-### Integrationstests
+### Security Best Practices
 
-```bash
-cd docker
-docker compose up -d
-# Warten Sie 30 Sekunden
-docker compose exec requirements-engineer pytest tests/ -v
-```
+- ✅ Keine Secrets im Code
+- ✅ Environment Variables für alles
+- ✅ GitHub Secrets für CI/CD
+- ✅ Cloudflare Workers mit minimalen Permissions
 
-## 🚢 Deployment
+---
 
-### Produktions-Deployment
-
-```bash
-cd docker
-docker compose pull
-docker compose up -d
-```
-
-### CI/CD Pipeline
-
-Die GitHub Actions Pipeline wird automatisch bei:
-- Push auf `main` oder `develop`
-- Pull Requests
-
-ausgeführt und baut alle Agenten-Container.
-
-## 📊 Monitoring
-
-### Grafana Dashboard
-
-Nach dem Start ist das Monitoring-Dashboard unter:
-```
-http://localhost:3000
-```
-verfügbar (Standard-Login: `admin`/`admin`).
-
-### MQTT Websocket
-
-Für Debugging können Sie MQTT-Nachrichten über:
-```
-http://localhost:9001
-```
-beobachten.
-
-## 🔧 Erweiterung
+## 🛠️ Erweiterung
 
 ### Neuen Agenten hinzufügen
 
-1. Verzeichnis erstellen:
+1. Prompt erstellen: `.claude/agents/new-agent.md`
+2. Docker Agent erstellen: `agents/new_agent/`
+3. Zu `docker-compose.yml` hinzufügen
+4. CI/CD Pipeline aktualisieren
+
+### Neue Features
+
 ```bash
-mkdir agents/new_agent
+# Feature Spec erstellen
+"Read .claude/agents/requirements-engineer.md and create a feature spec for [Feature Name]"
 ```
 
-2. `agent.py` implementieren:
-```python
-from common.base_agent import BaseAgent
-
-class NewAgent(BaseAgent):
-    def process_issue(self, issue):
-        # Ihre Logik
-        pass
-```
-
-3. Dockerfile erstellen
-4. Zu `docker-compose.yml` hinzufügen
-
-### LLM-Provider wechseln
-
-In `config/config.yaml`:
-```yaml
-llm:
-  provider: "anthropic"  # oder "openai"
-  model: "claude-3-sonnet"
-  api_key: "${LLM_API_KEY}"
-```
+---
 
 ## 📝 Lizenz
 
 Interner Gebrauch. Alle Rechte vorbehalten.
 
+---
+
 ## 🤝 Support
 
-Bei Fragen oder Problemen:
-- Issue im Repository erstellen
-- Dokumentation in `.github/` konsultieren
+Bei Fragen:
+- GitHub Issues erstellen
+- Claude Code Agenten konsultieren
+- Dokumentation in `.claude/agents/` lesen
+
+---
+
+**🚀 Built with StakraTech AI Development Platform**
