@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # MQTT Broker for Event System
+  mqtt-broker:
+    image: eclipse-mosquitto:2.0
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    networks:
+      - github-automation-network
+    restart: unless-stopped
+
+  # Requirements Engineer Agent
+  requirements-engineer:
+    build:
+      context: ../
+      dockerfile: agents/requirements_engineer/Dockerfile
+    container_name: requirements-engineer
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - MQTT_BROKER=mqtt://mqtt-broker:1883
+      - CONFIG_PATH=/app/config.yaml
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - agent_logs:/var/log/agents
+    networks:
+      - github-automation-network
+    depends_on:
+      - mqtt-broker
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Agent
+  frontend-agent:
+    build:
+      context: ../
+      dockerfile: agents/frontend_agent/Dockerfile
+    container_name: frontend-agent
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - MQTT_BROKER=mqtt://mqtt-broker:1883
+      - CONFIG_PATH=/app/config.yaml
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - agent_logs:/var/log/agents
+    networks:
+      - github-automation-network
+    depends_on:
+      - mqtt-broker
+    restart: unless-stopped
+
+  # Backend Agent
+  backend-agent:
+    build:
+      context: ../
+      dockerfile: agents/backend_agent/Dockerfile
+    container_name: backend-agent
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - MQTT_BROKER=mqtt://mqtt-broker:1883
+      - CONFIG_PATH=/app/config.yaml
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - agent_logs:/var/log/agents
+    networks:
+      - github-automation-network
+    depends_on:
+      - mqtt-broker
+    restart: unless-stopped
+
+  # QA Agent
+  qa-agent:
+    build:
+      context: ../
+      dockerfile: agents/qa_agent/Dockerfile
+    container_name: qa-agent
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - MQTT_BROKER=mqtt://mqtt-broker:1883
+      - CONFIG_PATH=/app/config.yaml
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - agent_logs:/var/log/agents
+    networks:
+      - github-automation-network
+    depends_on:
+      - mqtt-broker
+    restart: unless-stopped
+
+  # Monitoring Dashboard (Optional)
+  monitoring:
+    image: grafana/grafana:latest
+    container_name: monitoring
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - github-automation-network
+    depends_on:
+      - mqtt-broker
+    restart: unless-stopped
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:
+  agent_logs:
+  grafana_data:
+
+networks:
+  github-automation-network:
+    driver: bridge

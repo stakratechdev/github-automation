@@ -1,0 +1,2 @@
+# GitHub Automation Architecture - Backend Agent Requirements
+-r ../requirements.txt

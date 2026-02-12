@@ -1,0 +1,88 @@
+# GitHub Automation Architecture Configuration
+# =============================================
+
+# GitHub Configuration
+github:
+  owner: "your-org"
+  repo: "your-repo"
+  token: "${GITHUB_TOKEN}"
+  api_url: "https://api.github.com"
+  webhook_secret: "${WEBHOOK_SECRET}"
+
+# MQTT Configuration (Event System)
+mqtt:
+  broker: "mqtt://mqtt-broker:1883"
+  username: "${MQTT_USERNAME}"
+  password: "${MQTT_PASSWORD}"
+  client_id_prefix: "github-agent"
+  topics:
+    events: "github/automation/events"
+    status: "github/automation/status"
+    issues: "github/automation/issues"
+
+# LLM Configuration (API Keys via Environment Variables)
+llm:
+  provider: "openai"  # or "anthropic"
+  api_key: "${LLM_API_KEY}"
+  model: "gpt-4"
+  temperature: 0.3
+  max_tokens: 4000
+
+# Agent Configuration
+agents:
+  requirements_engineer:
+    name: "requirements-engineer"
+    poll_interval: 30  # seconds
+    labels:
+      new: "needs-analysis"
+      ready: "ready_for_dev"
+      in_progress: "in_progress"
+      blocked: "waiting_for_clarification"
+  
+  frontend_agent:
+    name: "frontend-agent"
+    poll_interval: 60
+    labels:
+      new: "frontend"
+      ready: "ready_for_qa"
+  
+  backend_agent:
+    name: "backend-agent"
+    poll_interval: 60
+    labels:
+      new: "backend"
+      ready: "ready_for_qa"
+  
+  qa_agent:
+    name: "qa-agent"
+    poll_interval: 60
+    labels:
+      new: "qa"
+      done: "done"
+
+# Repository Structure
+repository:
+  structure:
+    frontend: "frontend/"
+    backend: "backend/"
+    tests: "tests/"
+    docs: "docs/"
+  coding_guidelines: ".github/CODING_GUIDELINES.md"
+
+# Docker Configuration
+docker:
+  network: "github-automation-network"
+  base_image: "python:3.11-slim"
+
+# Security Configuration
+security:
+  secrets_management: "docker-secrets"
+  encryption_key: "${ENCRYPTION_KEY}"
+  rotation_days: 90
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "json"
+  output: "stdout"
+  log_file: "/var/log/agents/automation.log"
